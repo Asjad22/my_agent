@@ -1,0 +1,19 @@
+[package]
+name = "Myagent"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+autoagents = { version = "0.3.0", features = ["ollama"] }
+autoagents-derive = "0.3.0"
+autoagents-toolkit = { version = "0.3.0", features = ["filesystem", "search"] }
+
+# Async runtime
+tokio = { version = "1.37", features = ["macros", "rt-multi-thread"] }
+
+# Error handling
+anyhow = "1.0"
+
+# Required by #[agent] macro
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
