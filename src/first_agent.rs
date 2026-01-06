@@ -1,3 +1,4 @@
+use crate::config::AppConfig;
 use autoagents::async_trait;
 use autoagents::core::agent::prebuilt::executor::{ReActAgent, ReActAgentOutput};
 use autoagents::core::tool::{ToolCallError, ToolRuntime};
@@ -74,8 +75,8 @@ impl From<ReActAgentOutput> for MathOut {
 }
 
 /// Run agent
-pub async fn run_math_agent(llm: Arc<dyn LLMProvider>) -> anyhow::Result<MathOut> {
-    let memory = Box::new(SlidingWindowMemory::new(10));
+pub async fn run_math_agent(llm: Arc<dyn LLMProvider>, cfg: &AppConfig) -> anyhow::Result<MathOut> {
+    let memory = Box::new(SlidingWindowMemory::new(cfg.agent.memory_window));
     let agent = ReActAgent::new(MathAgent::default());
 
     let handle = AgentBuilder::<_, DirectAgent>::new(agent)
@@ -86,7 +87,7 @@ pub async fn run_math_agent(llm: Arc<dyn LLMProvider>) -> anyhow::Result<MathOut
 
     let result = handle
         .agent
-        .run(Task::new("Add 20 and 5 and explain"))
+        .run(Task::new("Add 20 and 5 and explain why?"))
         .await?;
 
     Ok(result)
