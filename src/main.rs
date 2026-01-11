@@ -12,6 +12,7 @@ async fn main() -> anyhow::Result<()> {
     let llm: Arc<Ollama> = LLMBuilder::<Ollama>::new()
         .base_url(&cfg.ollama.base_url)
         .model(&cfg.ollama.model)
+        .temperature(0.7)
         // .model("gemma3:4b") // doesn't support tool call
         .build()?;
 
