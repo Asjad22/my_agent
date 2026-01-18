@@ -11,6 +11,7 @@ dependencies = [
  "autoagents-derive",
  "autoagents-toolkit",
  "config",
+ "dotenv_rs",
  "reqwest",
  "serde",
  "serde_derive",
@@ -519,6 +520,12 @@ checksum = "d4b8a88685455ed29a21542a33abd9cb6510b6b129abadabdcef0f4c55bc8f61"
 dependencies = [
  "litrs",
 ]
+
+[[package]]
+name = "dotenv_rs"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "828401259441c2fefb04b5af2a5762cac529e17f76b87e8034b9987e541d4397"
 
 [[package]]
 name = "either"

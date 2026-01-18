@@ -1,11 +1,10 @@
-use crate::config::AppConfig;
 use reqwest::Client;
 use serde_json::json;
 
 // Check if the Ollama is already loaded
-pub async fn is_model_loaded(cfg: &AppConfig) -> anyhow::Result<bool> {
+pub async fn is_model_loaded(base_url: &str, model: &str) -> anyhow::Result<bool> {
     let client = Client::new();
-    let url = format!("{}/api/ps", cfg.ollama.base_url);
+    let url = format!("{}/api/ps", base_url);
     let resp = client.get(url).send().await?;
 
     if !resp.status().is_success() {
@@ -15,7 +14,7 @@ pub async fn is_model_loaded(cfg: &AppConfig) -> anyhow::Result<bool> {
     let json_resp: serde_json::Value = resp.json().await?;
     if let Some(models) = json_resp.get("models").and_then(|m| m.as_array()) {
         for m in models {
-            if m.get("name").and_then(|n| n.as_str()) == Some(&cfg.ollama.model) {
+            if m.get("name").and_then(|n| n.as_str()) == Some(model) {
                 return Ok(true);
             }
         }
@@ -24,27 +23,27 @@ pub async fn is_model_loaded(cfg: &AppConfig) -> anyhow::Result<bool> {
 }
 
 // Warm up Ollama model so it stays loaded
-pub async fn warmup_ollama(cfg: &AppConfig) -> anyhow::Result<()> {
+pub async fn warmup_ollama(base_url: &str, model: &str, keep_alive: i32) -> anyhow::Result<()> {
     // only run warm-up if not loaded
-    if is_model_loaded(cfg).await? {
+    if is_model_loaded(base_url, model).await? {
         println!(
             "Ollama model '{}' is already loaded, skipping warmup",
-            cfg.ollama.model
+            model
         );
         return Ok(());
     }
 
     let client = Client::new();
-    let url = format!("{}/api/chat", cfg.ollama.base_url);
+    let url = format!("{}/api/chat", base_url);
 
     let resp = client
         .post(url)
         .json(&json!({
-            "model": cfg.ollama.model,
+            "model": model,
             "messages": [
                 { "role": "user", "content": "warm up" }
             ],
-            "keep_alive": cfg.ollama.keep_alive
+            "keep_alive": keep_alive
         }))
         .send()
         .await?;
@@ -53,7 +52,7 @@ pub async fn warmup_ollama(cfg: &AppConfig) -> anyhow::Result<()> {
         let body = resp.text().await?;
         eprint!("Ollama warmpup failed: {}", body);
     } else {
-        println!("Ollama model '{}' warmed up", cfg.ollama.model);
+        println!("Ollama model '{}' warmed up", model);
     }
     Ok(())
 }
